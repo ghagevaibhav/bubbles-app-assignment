@@ -93,7 +93,6 @@ function App() {
         <div className=' bg-white'>
           <h1 className='text-2xl font-bold text-center'>Bubble App</h1>
           <canvas ref={canvasRef} id='mycanvas' width={800} height={400} className='border-2 rounded-md border-gray-400'>
-            Your browser does not support the HTML5 canvas tag.
           </canvas>
         </div>
         <div className='flex'>
