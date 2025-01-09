@@ -1,68 +1,73 @@
 import { useEffect, useRef, useState } from 'react';
-// import './App.css'
 
 const circleX = 100;
 const circleY = 200;
 const circleRadius = 40;
-
 const arrowY = 200;
 const arrowLen = 50;
-
-
-function drawArrow(ctx: CanvasRenderingContext2D, x: number) {
-  ctx.beginPath();
-  ctx.moveTo(x, arrowY)
-  ctx.lineTo(x + arrowLen, arrowY)
-  ctx.moveTo(x, arrowY)
-  ctx.lineTo(x + 15, arrowY - 10)
-  ctx.moveTo(x, arrowY)
-  ctx.lineTo(x + 15, arrowY + 10)
-  
-  ctx.strokeStyle = '#000'
-  ctx.lineWidth = 2
-  ctx.stroke();
-  ctx.closePath();
-}
-
-
-
-
 
 function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [animating, setAnimating] = useState(false);
+  const [arrowX, setArrowX] = useState(700);
   const [circleColor, setCircleColor] = useState('yellow')
-  
-  function animateArrow(canvasRef: HTMLCanvasElement) {
-    const [arrowX, setArrowX] = useState(700);
-    if (!canvasRef) return;
-    
-    const ctx = canvasRef.getContext("2d");
+  const requestId = useRef<number>();
+
+  function drawArrow(ctx: CanvasRenderingContext2D, x: number) {
+    ctx.beginPath();
+    ctx.moveTo(x, arrowY)
+    ctx.lineTo(x + arrowLen, arrowY)
+    ctx.moveTo(x, arrowY)
+    ctx.lineTo(x + 15, arrowY - 10)
+    ctx.moveTo(x, arrowY)
+    ctx.lineTo(x + 15, arrowY + 10)
+
+    ctx.strokeStyle = '#000'
+    ctx.lineWidth = 2
+    ctx.stroke();
+    ctx.closePath();
+  }
+
+  function animateArrow() {
+    if (!canvasRef.current) return;
+    const ctx = canvasRef.current.getContext("2d");
+    if (!ctx) return;
+
     setArrowX(x => {
       const newX = x - 3;
       if (newX <= circleX + circleRadius) {
-        setAnimating(false)
-
+        setAnimating(false);
+        setCircleColor('blue');
+        return circleX + circleRadius;
       }
-    })
+      return newX;
+    });
+    requestId.current = requestAnimationFrame(animateArrow);
   }
+
   // handles starting the animation
   function handleHit() {
     if (!animating && canvasRef.current) {
       setAnimating(true);
-      animateArrow(canvasRef.current);
+      animateArrow();
     }
   }
-  
+
   // handles reset functionality for arrow animation
   function handleReset() {
-    
+    if(requestId.current){
+      cancelAnimationFrame(requestId.current);
+
+      setAnimating(false)
+      setArrowX(700)
+      setCircleColor('blue')
+    }
   }
 
   function drawCircle(ctx: CanvasRenderingContext2D, x: number, y: number, radius: number, startAngle: number, endAngle: number) {
     ctx.beginPath();
     ctx.arc(x, y, radius, startAngle, endAngle);
-    ctx.fillStyle = 'blue';
+    ctx.fillStyle = circleColor;
     ctx.fill();
     ctx.closePath();
   }
@@ -73,9 +78,9 @@ function App() {
     const ctx = c.getContext('2d');
     if (ctx) {
       drawCircle(ctx, circleX, circleY, circleRadius, 0, 2 * Math.PI);
-      drawArrow(ctx, 700);
+      drawArrow(ctx, arrowX);
     }
-  }, [])
+  }, [arrowX, circleColor])
 
   return (
     <>
