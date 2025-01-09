@@ -1,24 +1,22 @@
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 // import './App.css'
 
-const arrowYPos = 200;
+const circleX = 100;
+const circleY = 200;
+const circleRadius = 40;
+
+const arrowY = 200;
 const arrowLen = 50;
 
-function drawCircle(ctx: CanvasRenderingContext2D, x: number, y: number, radius: number, startAngle: number, endAngle: number) {
-  ctx.beginPath();
-  ctx.arc(x, y, radius, startAngle, endAngle);
-  ctx.fillStyle = 'blue';
-  ctx.fill();
-}
 
 function drawArrow(ctx: CanvasRenderingContext2D, x: number) {
   ctx.beginPath();
-  ctx.moveTo(x, arrowYPos)
-  ctx.lineTo(x + arrowLen, arrowYPos)
-  ctx.moveTo(x, arrowYPos)
-  ctx.lineTo(x + 15, arrowYPos - 10)
-  ctx.moveTo(x, arrowYPos)
-  ctx.lineTo(x + 15, arrowYPos + 10)
+  ctx.moveTo(x, arrowY)
+  ctx.lineTo(x + arrowLen, arrowY)
+  ctx.moveTo(x, arrowY)
+  ctx.lineTo(x + 15, arrowY - 10)
+  ctx.moveTo(x, arrowY)
+  ctx.lineTo(x + 15, arrowY + 10)
   
   ctx.strokeStyle = '#000'
   ctx.lineWidth = 2
@@ -26,13 +24,55 @@ function drawArrow(ctx: CanvasRenderingContext2D, x: number) {
   ctx.closePath();
 }
 
+
+
+
+
 function App() {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const [animating, setAnimating] = useState(false);
+  const [circleColor, setCircleColor] = useState('yellow')
+  
+  function animateArrow(canvasRef: HTMLCanvasElement) {
+    const [arrowX, setArrowX] = useState(700);
+    if (!canvasRef) return;
+    
+    const ctx = canvasRef.getContext("2d");
+    setArrowX(x => {
+      const newX = x - 3;
+      if (newX <= circleX + circleRadius) {
+        setAnimating(false)
+
+      }
+    })
+  }
+  // handles starting the animation
+  function handleHit() {
+    if (!animating && canvasRef.current) {
+      setAnimating(true);
+      animateArrow(canvasRef.current);
+    }
+  }
+  
+  // handles reset functionality for arrow animation
+  function handleReset() {
+    
+  }
+
+  function drawCircle(ctx: CanvasRenderingContext2D, x: number, y: number, radius: number, startAngle: number, endAngle: number) {
+    ctx.beginPath();
+    ctx.arc(x, y, radius, startAngle, endAngle);
+    ctx.fillStyle = 'blue';
+    ctx.fill();
+    ctx.closePath();
+  }
+
   // circle on canvas
   useEffect(() => {
     const c = document.getElementById('mycanvas') as HTMLCanvasElement;
     const ctx = c.getContext('2d');
     if (ctx) {
-      drawCircle(ctx, 100, 200, 40, 0, 2 * Math.PI);
+      drawCircle(ctx, circleX, circleY, circleRadius, 0, 2 * Math.PI);
       drawArrow(ctx, 700);
     }
   }, [])
@@ -42,7 +82,7 @@ function App() {
       <div className='flex flex-col items-center justify-center min-h-screen'>
         <div className=' bg-white'>
           <h1 className='text-2xl font-bold text-center'>Bubble App</h1>
-          <canvas id='mycanvas' width={800} height={400} className='border-2 rounded-md border-gray-400'>
+          <canvas ref={canvasRef} id='mycanvas' width={800} height={400} className='border-2 rounded-md border-gray-400'>
             Your browser does not support the HTML5 canvas tag.
           </canvas>
         </div>
@@ -59,12 +99,5 @@ function App() {
   )
 }
 
-function handleHit() {
-  // Add bubble logic here
-}
-
-function handleReset(){
-  
-}
 
 export default App
