@@ -34,7 +34,7 @@ function App() {
     if (!ctx) return;
 
     setArrowX(x => {
-      const newX = x - 3;
+      const newX = x - 10;
       if (newX <= circleX + circleRadius) {
         setAnimating(false);
         setCircleColor('blue');
@@ -47,7 +47,7 @@ function App() {
 
   // handles starting the animation
   function handleHit() {
-    if (!animating && canvasRef.current) {
+    if (!animating) {
       setAnimating(true);
       animateArrow();
     }
@@ -55,12 +55,12 @@ function App() {
 
   // handles reset functionality for arrow animation
   function handleReset() {
-    if(requestId.current){
+    if (requestId.current) {
       cancelAnimationFrame(requestId.current);
 
       setAnimating(false)
       setArrowX(700)
-      setCircleColor('blue')
+      setCircleColor('yellow')
     }
   }
 
@@ -74,13 +74,18 @@ function App() {
 
   // circle on canvas
   useEffect(() => {
+    if(!canvasRef.current) return
     const c = document.getElementById('mycanvas') as HTMLCanvasElement;
     const ctx = c.getContext('2d');
+    if(!ctx) return 
+
+    ctx.clearRect(0, 0, c.width, c.height);
+
     if (ctx) {
       drawCircle(ctx, circleX, circleY, circleRadius, 0, 2 * Math.PI);
       drawArrow(ctx, arrowX);
     }
-  }, [arrowX, circleColor])
+  }, [arrowX])
 
   return (
     <>
@@ -93,7 +98,7 @@ function App() {
         </div>
         <div className='flex'>
           <div className='flex flex-row justify-center mt-4 mr-4'>
-            <button onClick={handleHit} className='px-4 py-2 rounded-md text-white bg-blue-500 hover:bg-blue-600'>Hit</button>
+            <button onClick={handleHit} disabled={animating} className='px-4 py-2 rounded-md text-white bg-blue-500 hover:bg-blue-600'>Hit</button>
           </div>
           <div onClick={handleReset} className='flex flex-row justify-center mt-4'>
             <button className='px-4 py-2 rounded-md text-white bg-red-500 hover:bg-red-600'>Reset</button>
